@@ -1,6 +1,12 @@
 import { createClient } from './supabase/server'
 import type { UserRole } from './types/database'
 
+export async function getSession() {
+  const supabase = await createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  return session
+}
+
 export async function getCurrentUser() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -36,4 +42,3 @@ export async function hasAnyRole(roles: UserRole[]): Promise<boolean> {
   const userRole = await getUserRole()
   return userRole !== null && roles.includes(userRole)
 }
-

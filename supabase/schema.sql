@@ -143,3 +143,27 @@ CREATE TRIGGER update_approvals_updated_at BEFORE UPDATE ON approvals
 CREATE TRIGGER update_handovers_updated_at BEFORE UPDATE ON handovers
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Function to handle new user creation (creates user_profile)
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.user_profiles (id, email, full_name, role)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', NULL),
+    COALESCE((NEW.raw_user_meta_data->>'role')::public.user_role, 'sales'::public.user_role)
+  );
+  RETURN NEW;
+END;
+$$;
+
+-- Trigger to create user_profile when auth user is created
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+

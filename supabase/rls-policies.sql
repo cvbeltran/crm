@@ -32,6 +32,13 @@ CREATE POLICY "Users can view own profile"
   ON user_profiles FOR SELECT
   USING (auth.uid() = id);
 
+-- Allow system to create user profiles (for trigger function)
+-- The handle_new_user() trigger function is SECURITY DEFINER and owned by postgres,
+-- so it should bypass RLS. This policy is a fallback to ensure compatibility.
+CREATE POLICY "System can create user profiles"
+  ON user_profiles FOR INSERT
+  WITH CHECK (true);
+
 -- Users can update their own profile (except role)
 CREATE POLICY "Users can update own profile"
   ON user_profiles FOR UPDATE

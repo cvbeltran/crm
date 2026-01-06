@@ -110,7 +110,8 @@ pending → accepted / flagged
 ├── supabase/              # Database files
 │   ├── schema.sql         # Database schema
 │   └── rls-policies.sql   # Row Level Security policies
-└── plan.md                # Build plan and requirements
+└── docs/                  # Project documentation
+    └── plan.md            # Build plan and requirements
 ```
 
 ## Development
