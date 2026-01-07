@@ -1,7 +1,4 @@
-import { redirect } from 'next/navigation'
-import { getSession, hasAnyRole } from '@/lib/auth'
 import { MainNav } from '@/components/navigation/main-nav'
-import { ROLES } from '@/lib/constants'
 import { getOpportunities } from '@/lib/actions/opportunities'
 import { QuoteCreateForm } from '@/components/quotes/quote-create-form'
 import { Card, CardContent } from '@/components/ui/card'
@@ -13,16 +10,7 @@ export default async function NewQuotePage({
 }: {
   searchParams: { opportunityId?: string }
 }) {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const canCreate = await hasAnyRole([ROLES.SALES, ROLES.EXECUTIVE])
-  
-  if (!canCreate) {
-    return (
+  return (
       <main className="flex min-h-screen flex-col">
         <MainNav />
         <div className="container mx-auto flex-1 p-4">

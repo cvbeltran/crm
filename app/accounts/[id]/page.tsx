@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation'
-import { getSession } from '@/lib/auth'
 import { MainNav } from '@/components/navigation/main-nav'
 import { Breadcrumbs } from '@/components/navigation/breadcrumbs'
 import { getAccount, updateAccount } from '@/lib/actions/accounts'
@@ -23,11 +21,6 @@ export default async function AccountDetailPage({
 }: {
   params: { id: string }
 }) {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
 
   const { data: account, error } = await getAccount(params.id)
   const { data: opportunities } = await getOpportunities(params.id)

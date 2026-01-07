@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation'
-import { getSession, getUserRole } from '@/lib/auth'
 import { MainNav } from '@/components/navigation/main-nav'
 import { Breadcrumbs } from '@/components/navigation/breadcrumbs'
 import { getHandover } from '@/lib/actions/handovers'
@@ -16,13 +14,7 @@ export default async function HandoverDetailPage({
 }: {
   params: { id: string }
 }) {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const role = await getUserRole()
+  const role = null
   const { data: handover, error } = await getHandover(params.id)
 
   if (error || !handover) {

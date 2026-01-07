@@ -1,8 +1,6 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getCurrentUser, hasRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import type { UserRole } from '@/lib/types/database'
 
 interface CreateUserInput {
@@ -30,24 +28,6 @@ interface CreateUserResult {
  * Only accessible by executives.
  */
 export async function createUser(input: CreateUserInput): Promise<CreateUserResult> {
-  // Check if current user is authorized (only executives)
-  const isAuthorized = await hasRole(ROLES.EXECUTIVE)
-  if (!isAuthorized) {
-    return {
-      data: null,
-      error: { message: 'Unauthorized: Only executives can create users' },
-    }
-  }
-
-  // Verify current user exists
-  const currentUser = await getCurrentUser()
-  if (!currentUser) {
-    return {
-      data: null,
-      error: { message: 'Unauthorized: You must be logged in' },
-    }
-  }
-
   try {
     const adminClient = createAdminClient()
 
@@ -101,14 +81,6 @@ export async function createUser(input: CreateUserInput): Promise<CreateUserResu
  * List all users (admin only)
  */
 export async function listUsers() {
-  const isAuthorized = await hasRole(ROLES.EXECUTIVE)
-  if (!isAuthorized) {
-    return {
-      data: null,
-      error: { message: 'Unauthorized: Only executives can list users' },
-    }
-  }
-
   try {
     const adminClient = createAdminClient()
     const { data, error } = await adminClient.auth.admin.listUsers()

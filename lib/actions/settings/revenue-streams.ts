@@ -1,8 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentUser, hasRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import type { Database } from '@/lib/types/supabase'
 
 // Re-export getRevenueModels for use in forms
@@ -15,11 +13,6 @@ type RevenueStreamUpdate = Database['public']['Tables']['revenue_streams']['Upda
  * Get all revenue streams (Executive only)
  */
 export async function getRevenueStreams() {
-  const canView = await hasRole(ROLES.EXECUTIVE)
-  if (!canView) {
-    return { data: null, error: { message: 'Unauthorized - Executive access required' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('revenue_streams')
@@ -36,11 +29,6 @@ export async function getRevenueStreams() {
  * Get a single revenue stream (Executive only)
  */
 export async function getRevenueStream(id: string) {
-  const canView = await hasRole(ROLES.EXECUTIVE)
-  if (!canView) {
-    return { data: null, error: { message: 'Unauthorized - Executive access required' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('revenue_streams')
@@ -58,16 +46,6 @@ export async function getRevenueStream(id: string) {
  * Create a revenue stream (Executive only)
  */
 export async function createRevenueStream(revenueStream: Omit<RevenueStreamInsert, 'created_by' | 'code' | 'ticket_size'> & { code?: string; ticket_size?: 'low' | 'mid' | 'high' }) {
-  const user = await getCurrentUser()
-  if (!user) {
-    return { data: null, error: { message: 'Unauthorized' } }
-  }
-
-  const canCreate = await hasRole(ROLES.EXECUTIVE)
-  if (!canCreate) {
-    return { data: null, error: { message: 'Unauthorized - Executive access required' } }
-  }
-
   const supabase = await createClient()
   // Generate code from name if not provided
   const code = revenueStream.code || revenueStream.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
@@ -95,11 +73,6 @@ export async function createRevenueStream(revenueStream: Omit<RevenueStreamInser
  * Update a revenue stream (Executive only)
  */
 export async function updateRevenueStream(id: string, updates: Partial<RevenueStreamUpdate>) {
-  const canUpdate = await hasRole(ROLES.EXECUTIVE)
-  if (!canUpdate) {
-    return { data: null, error: { message: 'Unauthorized - Executive access required' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('revenue_streams')

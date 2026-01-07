@@ -1,6 +1,3 @@
-import { redirect } from 'next/navigation'
-import { getSession, hasRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import { getRevenueStream } from '@/lib/actions/settings/revenue-streams'
 import { RevenueStreamForm } from '@/components/settings/revenue-stream-form'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,18 +9,6 @@ export default async function RevenueStreamDetailPage({
 }: {
   params: { id: string }
 }) {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const isExecutive = await hasRole(ROLES.EXECUTIVE)
-  
-  if (!isExecutive) {
-    redirect('/')
-  }
-
   const { data: revenueStream, error } = await getRevenueStream(params.id)
 
   if (error || !revenueStream) {

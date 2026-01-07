@@ -1,8 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentUser, hasAnyRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import { updateOpportunityState } from './state-transitions'
 import type { Database } from '@/lib/types/supabase'
 
@@ -53,23 +51,10 @@ export async function getOpportunity(id: string) {
  * Create a new opportunity
  */
 export async function createOpportunity(opportunity: OpportunityInsert) {
-  const user = await getCurrentUser()
-  if (!user) {
-    return { data: null, error: { message: 'Unauthorized' } }
-  }
-
-  const canCreate = await hasAnyRole([ROLES.SALES, ROLES.EXECUTIVE])
-  if (!canCreate) {
-    return { data: null, error: { message: 'Insufficient permissions' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('opportunities')
-    .insert({
-      ...opportunity,
-      owner_id: user.id,
-    })
+    .insert(opportunity)
     .select()
     .single()
 
@@ -80,11 +65,6 @@ export async function createOpportunity(opportunity: OpportunityInsert) {
  * Update an opportunity
  */
 export async function updateOpportunity(id: string, updates: OpportunityUpdate) {
-  const canUpdate = await hasAnyRole([ROLES.SALES, ROLES.EXECUTIVE])
-  if (!canUpdate) {
-    return { data: null, error: { message: 'Insufficient permissions' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('opportunities')
@@ -103,11 +83,6 @@ export async function transitionOpportunityState(
   id: string,
   newState: Database['public']['Enums']['opportunity_state']
 ) {
-  const canUpdate = await hasAnyRole([ROLES.SALES, ROLES.EXECUTIVE])
-  if (!canUpdate) {
-    return { success: false, error: 'Insufficient permissions' }
-  }
-
   return updateOpportunityState(id, newState)
 }
 

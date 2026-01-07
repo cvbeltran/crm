@@ -1,6 +1,3 @@
-import { redirect } from 'next/navigation'
-import { getSession, hasRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import { getOpportunityStage } from '@/lib/actions/settings/opportunity-stages'
 import { OpportunityStageForm } from '@/components/settings/opportunity-stage-form'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,18 +9,6 @@ export default async function OpportunityStageDetailPage({
 }: {
   params: { id: string }
 }) {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const isExecutive = await hasRole(ROLES.EXECUTIVE)
-  
-  if (!isExecutive) {
-    redirect('/')
-  }
-
   const { data: stage, error } = await getOpportunityStage(params.id)
 
   if (error || !stage) {

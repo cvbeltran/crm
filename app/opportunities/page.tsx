@@ -1,6 +1,4 @@
-import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
-import { getSession } from '@/lib/auth'
 import { MainNav } from '@/components/navigation/main-nav'
 import { getOpportunities } from '@/lib/actions/opportunities'
 import { Button } from '@/components/ui/button'
@@ -16,12 +14,6 @@ async function OpportunitiesList() {
 }
 
 export default async function OpportunitiesPage() {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
   return (
     <main className="flex min-h-screen flex-col">
       <MainNav />

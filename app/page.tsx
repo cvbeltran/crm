@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation'
-import { getSession, getUserRole } from '@/lib/auth'
 import { MainNav } from '@/components/navigation/main-nav'
 import { getDashboardMetrics } from '@/lib/actions/dashboard'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,13 +6,6 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
 export default async function Home() {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const role = await getUserRole()
   const metrics = await getDashboardMetrics()
 
   return (

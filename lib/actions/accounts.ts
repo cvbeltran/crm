@@ -1,8 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentUser, hasAnyRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import type { Database } from '@/lib/types/supabase'
 
 type AccountInsert = Database['public']['Tables']['accounts']['Insert']
@@ -39,23 +37,10 @@ export async function getAccount(id: string) {
  * Create a new account
  */
 export async function createAccount(account: AccountInsert) {
-  const user = await getCurrentUser()
-  if (!user) {
-    return { data: null, error: { message: 'Unauthorized' } }
-  }
-
-  const canCreate = await hasAnyRole([ROLES.SALES, ROLES.EXECUTIVE])
-  if (!canCreate) {
-    return { data: null, error: { message: 'Insufficient permissions' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('accounts')
-    .insert({
-      ...account,
-      created_by: user.id,
-    })
+    .insert(account)
     .select()
     .single()
 
@@ -66,11 +51,6 @@ export async function createAccount(account: AccountInsert) {
  * Update an account
  */
 export async function updateAccount(id: string, updates: AccountUpdate) {
-  const canUpdate = await hasAnyRole([ROLES.SALES, ROLES.EXECUTIVE])
-  if (!canUpdate) {
-    return { data: null, error: { message: 'Insufficient permissions' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('accounts')

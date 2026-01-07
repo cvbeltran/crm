@@ -1,8 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentUser, hasAnyRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import type { Database } from '@/lib/types/supabase'
 
 type ApprovalInsert = Database['public']['Tables']['approvals']['Insert']
@@ -28,24 +26,11 @@ export async function getApprovalsByQuote(quoteId: string) {
 /**
  * Create an approval record
  */
-export async function createApproval(approval: Omit<ApprovalInsert, 'approver_id'>) {
-  const user = await getCurrentUser()
-  if (!user) {
-    return { data: null, error: { message: 'Unauthorized' } }
-  }
-
-  const canCreate = await hasAnyRole([ROLES.FINANCE, ROLES.EXECUTIVE])
-  if (!canCreate) {
-    return { data: null, error: { message: 'Insufficient permissions' } }
-  }
-
+export async function createApproval(approval: ApprovalInsert) {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('approvals')
-    .insert({
-      ...approval,
-      approver_id: user.id,
-    })
+    .insert(approval)
     .select(`
       *,
       approver:user_profiles(id, email, full_name, role)
@@ -59,11 +44,6 @@ export async function createApproval(approval: Omit<ApprovalInsert, 'approver_id
  * Update an approval record
  */
 export async function updateApproval(id: string, updates: ApprovalUpdate) {
-  const canUpdate = await hasAnyRole([ROLES.FINANCE, ROLES.EXECUTIVE])
-  if (!canUpdate) {
-    return { data: null, error: { message: 'Insufficient permissions' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('approvals')

@@ -1,6 +1,3 @@
-import { redirect } from 'next/navigation'
-import { getSession, hasRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import { getICPCategory } from '@/lib/actions/settings/icp-categories'
 import { ICPCategoryForm } from '@/components/settings/icp-category-form'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,18 +9,6 @@ export default async function ICPCategoryDetailPage({
 }: {
   params: { id: string }
 }) {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const isExecutive = await hasRole(ROLES.EXECUTIVE)
-  
-  if (!isExecutive) {
-    redirect('/')
-  }
-
   const { data: icpCategory, error } = await getICPCategory(params.id)
 
   if (error || !icpCategory) {

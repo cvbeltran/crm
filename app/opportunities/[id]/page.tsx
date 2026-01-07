@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation'
-import { getSession } from '@/lib/auth'
 import { MainNav } from '@/components/navigation/main-nav'
 import { Breadcrumbs } from '@/components/navigation/breadcrumbs'
 import { getOpportunity } from '@/lib/actions/opportunities'
@@ -24,11 +22,6 @@ export default async function OpportunityDetailPage({
 }: {
   params: { id: string }
 }) {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
 
   const { data: opportunity, error } = await getOpportunity(params.id)
   const { data: quotes } = await getQuotes(params.id)

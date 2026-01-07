@@ -1,21 +1,7 @@
-import { redirect } from 'next/navigation'
-import { getSession, hasRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import { MainNav } from '@/components/navigation/main-nav'
 import { UsersListClient } from '@/components/users/users-list-client'
 
 export default async function UsersPage() {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const isAuthorized = await hasRole(ROLES.EXECUTIVE)
-  if (!isAuthorized) {
-    redirect('/')
-  }
-
   return (
     <main className="flex min-h-screen flex-col">
       <MainNav />

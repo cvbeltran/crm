@@ -1,6 +1,3 @@
-import { redirect } from 'next/navigation'
-import { getSession, hasRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import { getRevenueModel } from '@/lib/actions/settings/revenue-models'
 import { RevenueModelForm } from '@/components/settings/revenue-model-form'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,18 +9,6 @@ export default async function RevenueModelDetailPage({
 }: {
   params: { id: string }
 }) {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const isExecutive = await hasRole(ROLES.EXECUTIVE)
-  
-  if (!isExecutive) {
-    redirect('/')
-  }
-
   const { data: revenueModel, error } = await getRevenueModel(params.id)
 
   if (error || !revenueModel) {

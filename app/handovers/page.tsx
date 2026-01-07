@@ -1,6 +1,4 @@
-import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
-import { getSession, getUserRole } from '@/lib/auth'
 import { MainNav } from '@/components/navigation/main-nav'
 import { getHandovers } from '@/lib/actions/handovers'
 import { Button } from '@/components/ui/button'
@@ -16,14 +14,7 @@ async function HandoversList() {
 }
 
 export default async function HandoversPage() {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const role = await getUserRole()
-  const canCreate = role === 'sales' || role === 'executive'
+  const canCreate = true
 
   return (
     <main className="flex min-h-screen flex-col">

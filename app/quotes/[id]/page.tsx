@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation'
-import { getSession, getUserRole } from '@/lib/auth'
 import { MainNav } from '@/components/navigation/main-nav'
 import { Breadcrumbs } from '@/components/navigation/breadcrumbs'
 import { getQuote } from '@/lib/actions/quotes'
@@ -17,13 +15,7 @@ export default async function QuoteDetailPage({
 }: {
   params: { id: string }
 }) {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const role = await getUserRole()
+  const role = null
   const { data: quote, error } = await getQuote(params.id)
 
   if (error || !quote) {

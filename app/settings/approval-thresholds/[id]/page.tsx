@@ -1,6 +1,3 @@
-import { redirect } from 'next/navigation'
-import { getSession, hasRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import { getApprovalThreshold } from '@/lib/actions/settings/approval-thresholds'
 import { ApprovalThresholdForm } from '@/components/settings/approval-threshold-form'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,18 +9,6 @@ export default async function ApprovalThresholdDetailPage({
 }: {
   params: { id: string }
 }) {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const isExecutive = await hasRole(ROLES.EXECUTIVE)
-  
-  if (!isExecutive) {
-    redirect('/')
-  }
-
   const { data: threshold, error } = await getApprovalThreshold(params.id)
 
   if (error || !threshold) {

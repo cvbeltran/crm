@@ -1,11 +1,9 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { getUserRole } from '@/lib/auth'
 
 export async function getDashboardMetrics() {
   const supabase = await createClient()
-  const role = await getUserRole()
 
   // Get opportunity counts by state
   const { data: opportunities } = await supabase
@@ -28,11 +26,7 @@ export async function getDashboardMetrics() {
   })
 
   // Get quote counts by state
-  const quoteQuery = role === 'operations'
-    ? supabase.from('quotes_for_operations').select('state')
-    : supabase.from('quotes').select('state')
-
-  const { data: quotes } = await quoteQuery
+  const { data: quotes } = await supabase.from('quotes').select('state')
 
   const quoteCounts = {
     draft: 0,
@@ -87,11 +81,7 @@ export async function getDashboardMetrics() {
   })
 
   // Recent quotes
-  const recentQuoteQuery = role === 'operations'
-    ? supabase.from('quotes_for_operations').select('id, quote_number, state, created_at').order('created_at', { ascending: false }).limit(5)
-    : supabase.from('quotes').select('id, quote_number, state, created_at').order('created_at', { ascending: false }).limit(5)
-
-  const { data: recentQuotes } = await recentQuoteQuery
+  const { data: recentQuotes } = await supabase.from('quotes').select('id, quote_number, state, created_at').order('created_at', { ascending: false }).limit(5)
 
   recentQuotes?.forEach((quote) => {
     recentActivity.push({

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -11,19 +11,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { Badge } from '@/components/ui/badge'
-import { LogoutButton } from '@/components/auth/logout-button'
-import { Separator } from '@/components/ui/separator'
 
-interface MobileNavProps {
-  profile: {
-    full_name?: string | null
-    email?: string | null
-    role?: string | null
-  } | null
-}
-
-export function MobileNav({ profile }: MobileNavProps) {
+export function MobileNav() {
   const [open, setOpen] = useState(false)
 
   const navItems = [
@@ -32,10 +21,8 @@ export function MobileNav({ profile }: MobileNavProps) {
     { href: '/opportunities', label: 'Opportunities' },
     { href: '/quotes', label: 'Quotes' },
     { href: '/handovers', label: 'Handovers' },
-    ...(profile?.role === 'executive' ? [
-      { href: '/users', label: 'Users' },
-      { href: '/settings', label: 'Settings' },
-    ] : []),
+    { href: '/users', label: 'Users' },
+    { href: '/settings', label: 'Settings' },
   ]
 
   return (
@@ -60,25 +47,6 @@ export function MobileNav({ profile }: MobileNavProps) {
               {item.label}
             </Link>
           ))}
-          <Separator className="my-4" />
-          <div className="flex flex-col gap-4">
-            <Link
-              href="/profile"
-              onClick={() => setOpen(false)}
-              className="text-base font-medium hover:underline py-2"
-            >
-              {profile?.full_name || profile?.email || 'Profile'}
-            </Link>
-            {profile?.role && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Role:</span>
-                <Badge variant="outline">{profile.role}</Badge>
-              </div>
-            )}
-            <div className="pt-2">
-              <LogoutButton />
-            </div>
-          </div>
         </div>
       </SheetContent>
     </Sheet>

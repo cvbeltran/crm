@@ -1,7 +1,4 @@
-import { redirect } from 'next/navigation'
-import { getSession, hasRole } from '@/lib/auth'
 import { MainNav } from '@/components/navigation/main-nav'
-import { ROLES } from '@/lib/constants'
 import Link from 'next/link'
 import { Settings, DollarSign, TrendingUp, Users, GitBranch, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -11,31 +8,6 @@ export default async function SettingsLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const isExecutive = await hasRole(ROLES.EXECUTIVE)
-  
-  if (!isExecutive) {
-    return (
-      <main className="flex min-h-screen flex-col">
-        <MainNav />
-        <div className="container mx-auto flex-1 p-4">
-          <div className="py-8">
-            <div className="text-center py-12">
-              <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
-              <p className="text-muted-foreground">
-                Settings are only accessible to Executive role users.
-              </p>
-            </div>
-          </div>
-        </div>
-      </main>
-    )
-  }
 
   const settingsLinks = [
     {

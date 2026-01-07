@@ -1,7 +1,4 @@
-import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
-import { getSession, hasRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import { getRevenueStreams } from '@/lib/actions/settings/revenue-streams'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -26,18 +23,6 @@ async function RevenueStreamsList() {
 }
 
 export default async function RevenueStreamsPage() {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const isExecutive = await hasRole(ROLES.EXECUTIVE)
-  
-  if (!isExecutive) {
-    redirect('/')
-  }
-
   return (
     <div>
       <div className="flex items-center justify-between mb-6">

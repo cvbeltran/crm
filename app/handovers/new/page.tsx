@@ -1,7 +1,4 @@
-import { redirect } from 'next/navigation'
-import { getSession, hasAnyRole } from '@/lib/auth'
 import { MainNav } from '@/components/navigation/main-nav'
-import { ROLES } from '@/lib/constants'
 import { getOpportunities } from '@/lib/actions/opportunities'
 import { getQuotes } from '@/lib/actions/quotes'
 import { HandoverCreateForm } from '@/components/handovers/handover-create-form'
@@ -14,27 +11,6 @@ export default async function NewHandoverPage({
 }: {
   searchParams: { opportunityId?: string }
 }) {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const canCreate = await hasAnyRole([ROLES.SALES, ROLES.EXECUTIVE])
-  
-  if (!canCreate) {
-    return (
-      <main className="flex min-h-screen flex-col">
-        <MainNav />
-        <div className="container mx-auto flex-1 p-4">
-          <div className="py-8">
-            <p className="text-destructive">You don't have permission to create handovers.</p>
-          </div>
-        </div>
-      </main>
-    )
-  }
-
   const { data: allOpportunities } = await getOpportunities()
   const { data: quotes } = await getQuotes()
 

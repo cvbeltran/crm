@@ -1,8 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentUser, hasAnyRole, getUserRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import { updateQuoteState } from './state-transitions'
 import { createApproval } from './approvals'
 import { getOpportunity } from './opportunities'
@@ -17,24 +15,7 @@ type QuoteUpdate = Database['public']['Tables']['quotes']['Update']
  */
 export async function getQuotes(opportunityId?: string) {
   const supabase = await createClient()
-  const role = await getUserRole()
 
-  // Operations role should use the restricted view
-  if (role === 'operations') {
-    const query = supabase.from('quotes_for_operations').select(`
-      *,
-      opportunity:opportunities(*)
-    `)
-    
-    if (opportunityId) {
-      query.eq('opportunity_id', opportunityId)
-    }
-    
-    const { data, error } = await query.order('created_at', { ascending: false })
-    return { data, error }
-  }
-
-  // Other roles can see all fields
   const query = supabase.from('quotes').select(`
     *,
     opportunity:opportunities(*)
@@ -49,27 +30,11 @@ export async function getQuotes(opportunityId?: string) {
 }
 
 /**
- * Get a single quote with role-based visibility
+ * Get a single quote
  */
 export async function getQuote(quoteId: string) {
   const supabase = await createClient()
-  const role = await getUserRole()
 
-  // Operations role should use the restricted view
-  if (role === 'operations') {
-    const { data, error } = await supabase
-      .from('quotes_for_operations')
-      .select(`
-        *,
-        opportunity:opportunities(*)
-      `)
-      .eq('id', quoteId)
-      .single()
-
-    return { data, error }
-  }
-
-  // Other roles can see all fields
   const { data, error } = await supabase
     .from('quotes')
     .select(`
@@ -110,16 +75,6 @@ export async function checkQuoteNumberExists(quoteNumber: string, excludeId?: st
  * Create a new quote
  */
 export async function createQuote(quote: QuoteInsert) {
-  const user = await getCurrentUser()
-  if (!user) {
-    return { data: null, error: { message: 'Unauthorized' } }
-  }
-
-  const canCreate = await hasAnyRole([ROLES.SALES, ROLES.EXECUTIVE])
-  if (!canCreate) {
-    return { data: null, error: { message: 'Insufficient permissions' } }
-  }
-
   // Validate opportunity state - quotes should only be created for proposal or closed_won opportunities
   const { data: opportunity, error: oppError } = await getOpportunity(quote.opportunity_id)
   if (oppError || !opportunity) {
@@ -147,10 +102,7 @@ export async function createQuote(quote: QuoteInsert) {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('quotes')
-    .insert({
-      ...quote,
-      created_by: user.id,
-    })
+    .insert(quote)
     .select()
     .single()
 
@@ -161,17 +113,6 @@ export async function createQuote(quote: QuoteInsert) {
  * Update a quote
  */
 export async function updateQuote(id: string, updates: QuoteUpdate) {
-  const role = await getUserRole()
-  
-  // Sales and Executive can update quotes
-  const canUpdate = await hasAnyRole([ROLES.SALES, ROLES.EXECUTIVE])
-  // Finance can update approval status
-  const canApprove = await hasAnyRole([ROLES.FINANCE, ROLES.EXECUTIVE])
-
-  if (!canUpdate && !canApprove) {
-    return { data: null, error: { message: 'Insufficient permissions' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('quotes')
@@ -191,22 +132,14 @@ export async function transitionQuoteState(
   newState: Database['public']['Enums']['quote_state'],
   comments?: string
 ) {
-  const role = await getUserRole()
-  
-  // Only Finance and Executive can approve/reject
+  // Update quote state
+  const result = await updateQuoteState(id, newState)
+  if (!result.success) {
+    return result
+  }
+
+  // Create approval record for approve/reject states
   if (newState === 'approved' || newState === 'rejected') {
-    const canApprove = await hasAnyRole([ROLES.FINANCE, ROLES.EXECUTIVE])
-    if (!canApprove) {
-      return { success: false, error: 'Insufficient permissions to approve/reject quotes' }
-    }
-
-    // Update quote state
-    const result = await updateQuoteState(id, newState)
-    if (!result.success) {
-      return result
-    }
-
-    // Create approval record (approver_id is set automatically in createApproval)
     const approvalResult = await createApproval({
       quote_id: id,
       status: newState === 'approved' ? 'approved' : 'rejected',
@@ -217,15 +150,7 @@ export async function transitionQuoteState(
       // Log error but don't fail the state transition
       console.error('Failed to create approval record:', approvalResult.error)
     }
-
-    return result
-  } else {
-    // Sales and Executive can move to pending_approval
-    const canUpdate = await hasAnyRole([ROLES.SALES, ROLES.EXECUTIVE])
-    if (!canUpdate) {
-      return { success: false, error: 'Insufficient permissions' }
-    }
   }
 
-  return updateQuoteState(id, newState)
+  return result
 }

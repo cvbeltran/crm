@@ -1,7 +1,4 @@
-import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
-import { getSession, hasRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import { getOpportunityStages } from '@/lib/actions/settings/opportunity-stages'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TableSkeleton } from '@/components/loading/table-skeleton'
@@ -24,18 +21,6 @@ async function OpportunityStagesList() {
 }
 
 export default async function OpportunityStagesPage() {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
-  const isExecutive = await hasRole(ROLES.EXECUTIVE)
-  
-  if (!isExecutive) {
-    redirect('/')
-  }
-
   return (
     <div>
       <div className="mb-6">

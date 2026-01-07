@@ -1,6 +1,4 @@
-import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
-import { getSession } from '@/lib/auth'
 import { MainNav } from '@/components/navigation/main-nav'
 import { getAccounts } from '@/lib/actions/accounts'
 import { Button } from '@/components/ui/button'
@@ -24,12 +22,6 @@ async function AccountsList() {
 }
 
 export default async function AccountsPage() {
-  const session = await getSession()
-  
-  if (!session) {
-    redirect('/login')
-  }
-
   return (
     <main className="flex min-h-screen flex-col">
       <MainNav />

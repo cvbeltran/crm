@@ -1,8 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentUser, hasRole } from '@/lib/auth'
-import { ROLES } from '@/lib/constants'
 import type { Database } from '@/lib/types/supabase'
 
 type OpportunityStageConfigInsert = Database['public']['Tables']['opportunity_stages_config']['Insert']
@@ -12,11 +10,6 @@ type OpportunityStageConfigUpdate = Database['public']['Tables']['opportunity_st
  * Get all opportunity stages config (Executive only)
  */
 export async function getOpportunityStages() {
-  const canView = await hasRole(ROLES.EXECUTIVE)
-  if (!canView) {
-    return { data: null, error: { message: 'Unauthorized - Executive access required' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('opportunity_stages_config')
@@ -30,11 +23,6 @@ export async function getOpportunityStages() {
  * Get a single opportunity stage config (Executive only)
  */
 export async function getOpportunityStage(id: string) {
-  const canView = await hasRole(ROLES.EXECUTIVE)
-  if (!canView) {
-    return { data: null, error: { message: 'Unauthorized - Executive access required' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('opportunity_stages_config')
@@ -50,23 +38,10 @@ export async function getOpportunityStage(id: string) {
  * Note: Limited editing - stage enum value cannot be changed
  */
 export async function createOpportunityStage(stage: Omit<OpportunityStageConfigInsert, 'created_by'>) {
-  const user = await getCurrentUser()
-  if (!user) {
-    return { data: null, error: { message: 'Unauthorized' } }
-  }
-
-  const canCreate = await hasRole(ROLES.EXECUTIVE)
-  if (!canCreate) {
-    return { data: null, error: { message: 'Unauthorized - Executive access required' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('opportunity_stages_config')
-    .insert({
-      ...stage,
-      created_by: user.id,
-    })
+    .insert(stage)
     .select()
     .single()
 
@@ -78,11 +53,6 @@ export async function createOpportunityStage(stage: Omit<OpportunityStageConfigI
  * Note: Limited editing - stage enum value cannot be changed, only display_name, description, order_index, is_active
  */
 export async function updateOpportunityStage(id: string, updates: Omit<OpportunityStageConfigUpdate, 'stage'>) {
-  const canUpdate = await hasRole(ROLES.EXECUTIVE)
-  if (!canUpdate) {
-    return { data: null, error: { message: 'Unauthorized - Executive access required' } }
-  }
-
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('opportunity_stages_config')
